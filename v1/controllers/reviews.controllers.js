@@ -10,6 +10,7 @@ export const createReview = async (req, res) => {
   const { review, recommendations } = await createReviewService(
     req.user.userId,
     req.validatedBody,
+    req.file,
   );
 
   res.status(201).json({
@@ -36,6 +37,7 @@ export const updateReview = async (req, res) => {
     req.user.userId,
     req.validatedParams.id,
     req.validatedBody,
+    req.file,
   );
 
   res.json(review);

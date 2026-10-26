@@ -5,7 +5,6 @@ import usersRoutes from "./routes/users.routes.js";
 import reviewsRoutes from "./routes/reviews.routes.js";
 import genresRoutes from "./routes/genres.routes.js";
 import moviesRoutes from "./routes/movies.routes.js";
-import uploadsRoutes from "./routes/uploads.routes.js";
 import { authenticateMiddleware } from "./middlewares/authenticate.middleware.js";
 
 const router = express.Router({ mergeParams: true });
@@ -20,6 +19,5 @@ router.use("/users", usersRoutes);
 router.use("/reviews", reviewsRoutes);
 router.use("/genres", genresRoutes);
 router.use("/movies", moviesRoutes);
-router.use("/uploads", uploadsRoutes);
 
 export default router;

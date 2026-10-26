@@ -17,10 +17,7 @@ const pointsRule = Joi.number().integer().min(1).max(10).messages({
   "any.required": "El puntaje es obligatorio",
 });
 
-const imageUrlRule = Joi.string().uri().allow("").messages({
-  "string.base": "La imagen debe ser un texto",
-  "string.uri": "La imagen debe ser una URL válida",
-});
+const unknownFieldMessage = { "object.unknown": "No se permite el campo {#label}" };
 
 export const createReviewSchema = Joi.object({
   tmdbId: Joi.number().integer().min(1).required().messages({
@@ -31,18 +28,12 @@ export const createReviewSchema = Joi.object({
   }),
   description: descriptionRule.required(),
   points: pointsRule.required(),
-  imageUrl: imageUrlRule,
-});
+}).messages(unknownFieldMessage);
 
 export const updateReviewSchema = Joi.object({
   description: descriptionRule,
   points: pointsRule,
-  imageUrl: imageUrlRule,
-})
-  .min(1)
-  .messages({
-    "object.min": "Debe enviar al menos un campo para modificar",
-  });
+}).messages(unknownFieldMessage);
 
 export const reviewsQuerySchema = Joi.object({
   page: Joi.number().integer().min(1).default(1).messages({

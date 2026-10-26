@@ -14,6 +14,7 @@ const reviewSchema = new mongoose.Schema(
     description: { type: String, required: true, trim: true },
     points: { type: Number, required: true, min: 1, max: 10 },
     imageUrl: { type: String, trim: true, default: "" },
+    imagePublicId: { type: String, default: "" },
   },
   { timestamps: true },
 );

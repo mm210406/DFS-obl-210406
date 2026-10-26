@@ -2,13 +2,14 @@ import Review from "../models/review.model.js";
 import User from "../models/user.model.js";
 import { getMovieService } from "./movies.services.js";
 import { updateRecommendationsService } from "./recommendations.services.js";
+import { uploadImageService, deleteImageService } from "./images.services.js";
 import { createError } from "../utils/error.util.js";
 
 export const PLUS_REVIEW_LIMIT = 4;
 
 const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export const createReviewService = async (userId, data) => {
+export const createReviewService = async (userId, data, file) => {
   const user = await User.findById(userId);
   if (!user) {
     throw createError(404, "Usuario no encontrado");
@@ -26,16 +27,25 @@ export const createReviewService = async (userId, data) => {
 
   const movie = await getMovieService(data.tmdbId);
 
-  const review = await Review.create({
-    userId,
-    tmdbId: movie.tmdbId,
-    movieTitle: movie.title,
-    synopsis: movie.overview,
-    genres: movie.genres.map((genre) => genre._id),
-    description: data.description,
-    points: data.points,
-    imageUrl: data.imageUrl || movie.posterUrl,
-  });
+  const image = file ? await uploadImageService(file.buffer) : null;
+
+  let review;
+  try {
+    review = await Review.create({
+      userId,
+      tmdbId: movie.tmdbId,
+      movieTitle: movie.title,
+      synopsis: movie.overview,
+      genres: movie.genres.map((genre) => genre._id),
+      description: data.description,
+      points: data.points,
+      imageUrl: image?.url || movie.posterUrl,
+      imagePublicId: image?.publicId || "",
+    });
+  } catch (error) {
+    await deleteImageService(image?.publicId);
+    throw error;
+  }
 
   await review.populate("genres", "name");
   const recommendations = await updateRecommendationsService(userId);
@@ -68,15 +78,35 @@ export const getReviewByIdService = async (userId, id) => {
   return review;
 };
 
-export const updateReviewService = async (userId, id, data) => {
-  const review = await Review.findOneAndUpdate({ _id: id, userId }, data, { returnDocument: "after" }).populate(
-    "genres",
-    "name",
-  );
+export const updateReviewService = async (userId, id, data, file) => {
+  if (Object.keys(data).length === 0 && !file) {
+    throw createError(400, "Debe enviar al menos un campo para modificar");
+  }
+
+  const review = await Review.findOne({ _id: id, userId });
   if (!review) {
     throw createError(404, "Reseña no encontrada");
   }
-  return review;
+
+  const previousPublicId = review.imagePublicId;
+  const image = file ? await uploadImageService(file.buffer) : null;
+
+  review.set(data);
+  if (image) {
+    review.imageUrl = image.url;
+    review.imagePublicId = image.publicId;
+  }
+
+  try {
+    await review.save();
+  } catch (error) {
+    await deleteImageService(image?.publicId);
+    throw error;
+  }
+
+  if (image) await deleteImageService(previousPublicId);
+
+  return await review.populate("genres", "name");
 };
 
 export const deleteReviewService = async (userId, id) => {
@@ -84,5 +114,6 @@ export const deleteReviewService = async (userId, id) => {
   if (!review) {
     throw createError(404, "Reseña no encontrada");
   }
+  await deleteImageService(review.imagePublicId);
   return review;
 };

@@ -4552,57 +4552,6 @@
                             }
                         },
                         {
-                            "name": "400 Crear reseña con imagen inválida",
-                            "event": [
-                                {
-                                    "listen": "test",
-                                    "script": {
-                                        "type": "text/javascript",
-                                        "exec": [
-                                            "pm.test(\"Status code is 400\", function () {",
-                                            "    pm.response.to.have.status(400);",
-                                            "});",
-                                            "pm.test(\"Response is JSON\", function () {",
-                                            "    pm.response.to.be.json;",
-                                            "});",
-                                            "const json = pm.response.json();",
-                                            "pm.test(\"Error de validación: La imagen debe ser una URL válida\", function () {",
-                                            "    pm.expect(json).to.have.property(\"error\");",
-                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"La imagen debe ser una URL válida\");",
-                                            "});"
-                                        ]
-                                    }
-                                }
-                            ],
-                            "request": {
-                                "method": "POST",
-                                "header": [
-                                    {
-                                        "key": "Content-Type",
-                                        "value": "application/json"
-                                    }
-                                ],
-                                "url": {
-                                    "raw": "{{prod_base_url}}/reviews",
-                                    "host": [
-                                        "{{prod_base_url}}"
-                                    ],
-                                    "path": [
-                                        "reviews"
-                                    ]
-                                },
-                                "body": {
-                                    "mode": "raw",
-                                    "raw": "{\n    \"tmdbId\": {{movieId1}},\n    \"description\": \"Reseña creada por el runner.\",\n    \"points\": 8,\n    \"imageUrl\": \"no-es-una-url\"\n}",
-                                    "options": {
-                                        "raw": {
-                                            "language": "json"
-                                        }
-                                    }
-                                }
-                            }
-                        },
-                        {
                             "name": "404 Crear reseña de película bloqueada",
                             "event": [
                                 {
@@ -5948,9 +5897,8 @@
                                             "    pm.response.to.be.json;",
                                             "});",
                                             "const json = pm.response.json();",
-                                            "pm.test(\"Error de validación: Debe enviar al menos un campo para modificar\", function () {",
-                                            "    pm.expect(json).to.have.property(\"error\");",
-                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"Debe enviar al menos un campo para modificar\");",
+                                            "pm.test(\"Mensaje: Debe enviar al menos un campo para modificar\", function () {",
+                                            "    pm.expect(json.mensaje).to.eql(\"Debe enviar al menos un campo para modificar\");",
                                             "});"
                                         ]
                                     }
@@ -6368,55 +6316,23 @@
             ]
         },
         {
-            "name": "uploads",
+            "name": "imágenes de reseñas",
             "description": "Subida de imágenes a Cloudinary.",
             "item": [
                 {
-                    "name": "201 Subir imagen (manual, elegir archivo)",
-                    "event": [],
-                    "request": {
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "{{prod_base_url}}/uploads/image",
-                            "host": [
-                                "{{prod_base_url}}"
-                            ],
-                            "path": [
-                                "uploads",
-                                "image"
-                            ]
-                        },
-                        "body": {
-                            "mode": "formdata",
-                            "formdata": [
-                                {
-                                    "key": "imagen",
-                                    "type": "file",
-                                    "src": []
-                                }
-                            ]
-                        },
-                        "description": "Elegir una imagen en el campo imagen antes de enviar. Responde 201 con la url de Cloudinary. Sin tests porque la colección exportada no incluye archivos."
-                    }
-                },
-                {
-                    "name": "400 Subir imagen sin archivo",
+                    "name": "201 Crear reseña con imagen (manual, elegir archivo)",
                     "event": [
                         {
                             "listen": "test",
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test(\"Status code is 400\", function () {",
-                                    "    pm.response.to.have.status(400);",
-                                    "});",
-                                    "pm.test(\"Response is JSON\", function () {",
-                                    "    pm.response.to.be.json;",
+                                    "pm.test(\"Status code is 201\", function () {",
+                                    "    pm.response.to.have.status(201);",
                                     "});",
                                     "const json = pm.response.json();",
-                                    "pm.test(\"Mensaje: No se subió ningún archivo en el campo 'imagen'\", function () {",
-                                    "    pm.expect(json.mensaje).to.eql(\"No se subió ningún archivo en el campo 'imagen'\");",
+                                    "pm.test(\"Review has an image url\", function () {",
+                                    "    pm.expect(json.review.imageUrl).to.be.a(\"string\").and.not.empty;",
                                     "});"
                                 ]
                             }
@@ -6426,19 +6342,40 @@
                         "method": "POST",
                         "header": [],
                         "url": {
-                            "raw": "{{prod_base_url}}/uploads/image",
+                            "raw": "{{prod_base_url}}/reviews",
                             "host": [
                                 "{{prod_base_url}}"
                             ],
                             "path": [
-                                "uploads",
-                                "image"
+                                "reviews"
                             ]
                         },
                         "body": {
                             "mode": "formdata",
-                            "formdata": []
-                        }
+                            "formdata": [
+                                {
+                                    "key": "tmdbId",
+                                    "value": "{{movieId1}}",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Reseña con imagen subida desde Postman.",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "points",
+                                    "value": "9",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "imagen",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "description": "Alta de reseña con imagen en un solo paso (form-data). Elegir una imagen en el campo imagen antes de enviar: la respuesta trae review.imageUrl con la url de Cloudinary. Sin imagen se usa el póster de TMDB. Usa movieId1 porque la reseña 1 se eliminó antes en la colección. Errores esperables: archivo que no es imagen o de más de 4 MB → 400; imagen en otro campo que no sea imagen → 400."
                     }
                 }
             ]

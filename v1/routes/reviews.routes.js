@@ -2,6 +2,7 @@ import express from "express";
 import { validateBodyMiddleware } from "../middlewares/validateBody.middleware.js";
 import { validateParamsMiddleware } from "../middlewares/validateParams.middleware.js";
 import { validateQueryMiddleware } from "../middlewares/validateQuery.middleware.js";
+import { uploadImageMiddleware } from "../middlewares/multer.middleware.js";
 import {
   createReviewSchema,
   updateReviewSchema,
@@ -19,10 +20,11 @@ import {
 const router = express.Router();
 router.get("/", validateQueryMiddleware(reviewsQuerySchema), getReviews);
 router.get("/:id", validateParamsMiddleware(idParamSchema), getReviewById);
-router.post("/", validateBodyMiddleware(createReviewSchema), createReview);
+router.post("/", uploadImageMiddleware, validateBodyMiddleware(createReviewSchema), createReview);
 router.patch(
   "/:id",
   validateParamsMiddleware(idParamSchema),
+  uploadImageMiddleware,
   validateBodyMiddleware(updateReviewSchema),
   updateReview,
 );
