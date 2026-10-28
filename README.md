@@ -9,11 +9,12 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 - **Reseñas (documento principal):** el usuario elige una película del catálogo por su `tmdbId`. El backend trae el título, la sinopsis y los géneros de TMDB y rechaza la reseña si la película no está permitida. Una reseña por película.
 - **Planes:** PLUS permite 4 reseñas y PREMIUM, ilimitadas. El admin no gestiona planes.
 - **IA (Groq):** al crear una reseña se generan recomendaciones a partir de las reseñas del usuario. Cada recomendación se verifica contra el catálogo permitido. Si la IA no está disponible, la reseña se guarda igual.
+- **Límite de solicitudes:** cada IP puede hacer hasta 300 solicitudes a `/v1` cada 15 minutos, y hasta 10 intentos de login fallidos cada 15 minutos (los exitosos no cuentan). Al superarlo se responde 429.
 - **Imágenes (Cloudinary):** la imagen se sube junto con la reseña, en el mismo request (form-data, campo `imagen`, hasta 4 MB). Solo se sube a Cloudinary después de validar la reseña, y se borra de Cloudinary si se reemplaza o se elimina la reseña. Si una reseña no tiene imagen, se usa el póster de TMDB.
 
 ## Puesta en marcha
 
-1. `npm install`
+1. `npm install` (incluye `express-rate-limit`)
 2. `npm run seed` — carga los datos de prueba (ver abajo). Necesita `MONGO_URI`, `TMDB_API_KEY` y `GROQ_API_KEY`. Se puede correr más de una vez sin duplicar datos.
 3. `npm run dev`
 
