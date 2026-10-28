@@ -4,11 +4,12 @@ import { createError } from "../utils/error.util.js";
 
 const CLOUDINARY_FOLDER = "cine-review";
 
-export const uploadImageService = async (buffer) => {
+export const uploadImageService = async (buffer, options = {}) => {
   try {
     const result = await uploadBufferToCloudinary(cloudinary, buffer, {
       resource_type: "image",
       folder: CLOUDINARY_FOLDER,
+      ...options,
     });
     return { url: result.secure_url, publicId: result.public_id };
   } catch (error) {

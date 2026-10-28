@@ -11,6 +11,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 - **IA (Groq):** al crear una reseña se generan recomendaciones a partir de las reseñas del usuario. Cada recomendación se verifica contra el catálogo permitido. Si la IA no está disponible, la reseña se guarda igual.
 - **Límite de solicitudes:** cada IP puede hacer hasta 300 solicitudes a `/v1` cada 15 minutos, y hasta 10 intentos de login fallidos cada 15 minutos (los exitosos no cuentan). Al superarlo se responde 429.
 - **Imágenes (Cloudinary):** la imagen se sube junto con la reseña, en el mismo request (form-data, campo `imagen`, hasta 4 MB). Solo se sube a Cloudinary después de validar la reseña, y se borra de Cloudinary si se reemplaza o se elimina la reseña. Si una reseña no tiene imagen, se usa el póster de TMDB.
+- **Foto de perfil:** cada usuario puede subir una foto (form-data, campo `imagen`, hasta 4 MB). Se guarda en Cloudinary recortada a 400x400, centrada en la cara. Al reemplazarla o eliminarla, la anterior se borra de Cloudinary. Se devuelve como `avatarUrl` en los datos del usuario (vacío si no tiene).
 
 ## Puesta en marcha
 
@@ -35,6 +36,8 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | POST | `/v1/auth/login` | Pública | Login |
 | GET | `/v1/users/me` | Usuario | Perfil, uso del plan y recomendaciones |
 | PATCH | `/v1/users/plan` | Usuario | Cambio de PLUS a PREMIUM |
+| PUT | `/v1/users/me/avatar` | Usuario | Sube o reemplaza la foto de perfil (form-data, campo `imagen`) |
+| DELETE | `/v1/users/me/avatar` | Usuario | Elimina la foto de perfil |
 | GET | `/v1/movies?page=&title=` | Usuario | Catálogo de películas permitidas |
 | GET | `/v1/movies/:tmdbId` | Usuario | Detalle de una película |
 | GET | `/v1/reviews?page=&limit=&genreId=&points=&title=` | Usuario | Reseñas propias, paginadas y filtradas |

@@ -6316,7 +6316,7 @@
             ]
         },
         {
-            "name": "imágenes de reseñas",
+            "name": "imágenes",
             "description": "Subida de imágenes a Cloudinary.",
             "item": [
                 {
@@ -6376,6 +6376,110 @@
                             ]
                         },
                         "description": "Alta de reseña con imagen en un solo paso (form-data). Elegir una imagen en el campo imagen antes de enviar: la respuesta trae review.imageUrl con la url de Cloudinary. Sin imagen se usa el póster de TMDB. Usa movieId1 porque la reseña 1 se eliminó antes en la colección. Errores esperables: archivo que no es imagen o de más de 4 MB → 400; imagen en otro campo que no sea imagen → 400."
+                    }
+                },
+                {
+                    "name": "200 Subir foto de perfil (manual, elegir archivo)",
+                    "event": [],
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "url": {
+                            "raw": "{{prod_base_url}}/users/me/avatar",
+                            "host": [
+                                "{{prod_base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me",
+                                "avatar"
+                            ]
+                        },
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "imagen",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "description": "Elegir una imagen en el campo imagen antes de enviar. Responde 200 con user.avatarUrl (Cloudinary, recortada a 400x400 centrada en la cara). Si ya había una foto, la anterior se borra de Cloudinary. Sin tests porque la colección exportada no incluye archivos."
+                    }
+                },
+                {
+                    "name": "400 Subir foto de perfil sin archivo",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 400\", function () {",
+                                    "    pm.response.to.have.status(400);",
+                                    "});",
+                                    "const json = pm.response.json();",
+                                    "pm.test(\"Mensaje: Debe enviar una imagen en el campo 'imagen'\", function () {",
+                                    "    pm.expect(json.mensaje).to.eql(\"Debe enviar una imagen en el campo 'imagen'\");",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "PUT",
+                        "header": [],
+                        "url": {
+                            "raw": "{{prod_base_url}}/users/me/avatar",
+                            "host": [
+                                "{{prod_base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me",
+                                "avatar"
+                            ]
+                        },
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": []
+                        }
+                    }
+                },
+                {
+                    "name": "200 Eliminar foto de perfil",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "const json = pm.response.json();",
+                                    "pm.test(\"User has no avatar\", function () {",
+                                    "    pm.expect(json.user.avatarUrl).to.eql(\"\");",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{prod_base_url}}/users/me/avatar",
+                            "host": [
+                                "{{prod_base_url}}"
+                            ],
+                            "path": [
+                                "users",
+                                "me",
+                                "avatar"
+                            ]
+                        }
                     }
                 }
             ]

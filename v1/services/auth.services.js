@@ -14,6 +14,7 @@ export const buildAuthResponse = (user) => {
       email: user.email,
       plan: user.plan,
       role: user.role,
+      avatarUrl: user.avatarUrl,
     },
   };
 };

@@ -23,6 +23,8 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     plan: { type: String, enum: ["PLUS", "PREMIUM"], default: "PLUS" },
     role: { type: String, enum: ["CLIENT", "ADMIN"], default: "CLIENT" },
+    avatarUrl: { type: String, default: "" },
+    avatarPublicId: { type: String, default: "" },
     recommendations: { type: [recommendationSchema], default: [] },
     recommendationsUpdatedAt: { type: Date, default: null },
   },
