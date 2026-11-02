@@ -117,3 +117,36 @@ export const deleteReviewService = async (userId, id) => {
   await deleteImageService(review.imagePublicId);
   return review;
 };
+
+export const getMovieReviewsService = async (userId, tmdbId, { page, limit }) => {
+  await getMovieService(tmdbId, userId);
+
+  const filter = { tmdbId };
+  const total = await Review.countDocuments(filter);
+  const reviews = await Review.find(filter)
+    .select("points description imageUrl createdAt updatedAt userId")
+    .populate("userId", "name avatarUrl")
+    .sort({ createdAt: -1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  return {
+    page,
+    limit,
+    total,
+    pages: Math.ceil(total / limit),
+    reviews: reviews.map((review) => ({
+      _id: review._id,
+      author: {
+        name: review.userId?.name || "Usuario eliminado",
+        avatarUrl: review.userId?.avatarUrl || "",
+      },
+      isMine: String(review.userId?._id) === String(userId),
+      points: review.points,
+      description: review.description,
+      imageUrl: review.imageUrl,
+      createdAt: review.createdAt,
+      updatedAt: review.updatedAt,
+    })),
+  };
+};

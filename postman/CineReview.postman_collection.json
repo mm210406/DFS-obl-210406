@@ -5828,6 +5828,202 @@
                     ]
                 },
                 {
+                    "name": "reseñas públicas de una película",
+                    "item": [
+                        {
+                            "name": "200 Reseñas de una película",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "const mine = json.reviews.find(r => r._id === pm.collectionVariables.get(\"reviewId\"));",
+                                            "pm.test(\"Includes my review marked as mine\", function () {",
+                                            "    pm.expect(mine).to.exist;",
+                                            "    pm.expect(mine.isMine).to.eql(true);",
+                                            "});",
+                                            "pm.test(\"Only exposes the author name and avatar\", function () {",
+                                            "    pm.expect(mine.author).to.have.property(\"name\");",
+                                            "    pm.expect(mine.author).to.not.have.property(\"email\");",
+                                            "    pm.expect(mine).to.not.have.property(\"userId\");",
+                                            "});",
+                                            "pm.test(\"Response is paginated\", function () {",
+                                            "    pm.expect(json).to.include.keys(\"page\", \"limit\", \"total\", \"pages\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies/{{movieId1}}/reviews",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies",
+                                        "{{movieId1}}",
+                                        "reviews"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "200 Reseñas de una película vistas por otro usuario",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "const review = json.reviews.find(r => r._id === pm.collectionVariables.get(\"reviewId\"));",
+                                            "pm.test(\"Other users can see the review, not as theirs\", function () {",
+                                            "    pm.expect(review).to.exist;",
+                                            "    pm.expect(review.isMine).to.eql(false);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies/{{movieId1}}/reviews",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies",
+                                        "{{movieId1}}",
+                                        "reviews"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "bearer",
+                                    "bearer": [
+                                        {
+                                            "key": "token",
+                                            "value": "{{anaToken}}",
+                                            "type": "string"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "400 Reseñas de una película con página 0",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies/{{movieId1}}/reviews?page=0",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies",
+                                        "{{movieId1}}",
+                                        "reviews"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "0"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "400 Reseñas de una película con id inválido",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies/abc/reviews",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies",
+                                        "abc",
+                                        "reviews"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "404 Reseñas de una película bloqueada",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 404\", function () {",
+                                            "    pm.response.to.have.status(404);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies/{{blockedMovieId}}/reviews",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies",
+                                        "{{blockedMovieId}}",
+                                        "reviews"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "modificar",
                     "item": [
                         {

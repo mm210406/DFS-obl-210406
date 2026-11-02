@@ -6,7 +6,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 
 - **Catálogo (API externa TMDB):** las películas salen de TMDB. El catálogo oculta las películas de géneros bloqueados por el admin y las películas para adultos.
 - **Géneros (categorías):** son los géneros de TMDB, identificados por `tmdbId`. El admin consulta la lista de TMDB y crea los que quiere ofrecer, con nombre e ícono opcionales. El catálogo solo muestra películas cuyos géneros estén todos creados y permitidos (`allowed`). No se puede borrar un género con reseñas; para dejar de permitirlo se deshabilita. Si el usuario reseñó una película que después quedó bloqueada, puede seguir viendo su detalle.
-- **Reseñas (documento principal):** el usuario elige una película del catálogo por su `tmdbId`. El backend trae el título, la sinopsis y los géneros de TMDB y rechaza la reseña si la película no está permitida. Una reseña por película.
+- **Reseñas (documento principal):** el usuario elige una película del catálogo por su `tmdbId`. El backend trae el título, la sinopsis y los géneros de TMDB y rechaza la reseña si la película no está permitida. Una reseña por película. Las reseñas son públicas: en el detalle de una película se ven las de todos los usuarios (solo el nombre y la foto del autor), pero cada usuario solo puede modificar o eliminar las suyas.
 - **Planes:** PLUS permite 4 reseñas y PREMIUM, ilimitadas. El admin no gestiona planes.
 - **IA (Groq):** al crear una reseña se generan recomendaciones a partir de las reseñas del usuario. Cada recomendación se verifica contra el catálogo permitido. Si la IA no está disponible, la reseña se guarda igual.
 - **Límite de solicitudes:** cada IP puede hacer hasta 300 solicitudes a `/v1` cada 15 minutos, y hasta 10 intentos de login fallidos cada 15 minutos (los exitosos no cuentan). Al superarlo se responde 429.
@@ -40,6 +40,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | DELETE | `/v1/users/me/avatar` | Usuario | Elimina la foto de perfil |
 | GET | `/v1/movies?page=&title=` | Usuario | Catálogo de películas permitidas |
 | GET | `/v1/movies/:tmdbId` | Usuario | Detalle de una película |
+| GET | `/v1/movies/:tmdbId/reviews?page=&limit=` | Usuario | Reseñas de todos los usuarios para esa película, paginadas |
 | GET | `/v1/reviews?page=&limit=&genreId=&points=&title=` | Usuario | Reseñas propias, paginadas y filtradas |
 | GET | `/v1/reviews/:id` | Usuario | Una reseña propia |
 | POST | `/v1/reviews` | Usuario | Alta: `tmdbId`, `description`, `points` (JSON o form-data) y archivo `imagen` opcional |

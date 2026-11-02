@@ -22,3 +22,17 @@ export const tmdbIdParamSchema = Joi.object({
     "any.required": "El id de la película es obligatorio",
   }),
 });
+
+export const movieReviewsQuerySchema = Joi.object({
+  page: Joi.number().integer().min(1).default(1).messages({
+    "number.base": "page debe ser un número",
+    "number.integer": "page debe ser un número entero",
+    "number.min": "page debe ser mayor o igual a {#limit}",
+  }),
+  limit: Joi.number().integer().min(1).max(50).default(10).messages({
+    "number.base": "limit debe ser un número",
+    "number.integer": "limit debe ser un número entero",
+    "number.min": "limit debe ser mayor o igual a {#limit}",
+    "number.max": "limit debe ser menor o igual a {#limit}",
+  }),
+});
