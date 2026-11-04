@@ -7068,7 +7068,7 @@
     "variable": [
         {
             "key": "prod_base_url",
-            "value": "https://dfs-obl1-207448-210406-backend.vercel.app/v1"
+            "value": "https://dfs-obl-210406-backend.vercel.app/v1"
         },
         {
             "key": "adminEmail",
