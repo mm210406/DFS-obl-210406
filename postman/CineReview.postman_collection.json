@@ -2921,6 +2921,15 @@
                                             "    pm.expect(json.title).to.be.a(\"string\");",
                                             "    pm.expect(json.overview).to.be.a(\"string\");",
                                             "    pm.expect(json.genres).to.be.an(\"array\");",
+                                            "});",
+                                            "pm.test(\"Movie has poster, backdrop and CineReview score\", function () {",
+                                            "    pm.expect(json.posterUrl).to.be.a(\"string\");",
+                                            "    pm.expect(json.backdropUrl).to.be.a(\"string\");",
+                                            "    pm.expect(json).to.have.property(\"score\");",
+                                            "    if (json.score !== null) {",
+                                            "        pm.expect(json.score.average).to.be.within(1, 10);",
+                                            "        pm.expect(json.score.count).to.be.at.least(1);",
+                                            "    }",
                                             "});"
                                         ]
                                     }

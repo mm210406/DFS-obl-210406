@@ -1,6 +1,6 @@
 import {
   getCatalogService,
-  getMovieService,
+  getMovieDetailService,
   getTopMoviesService,
 } from "../services/movies.services.js";
 import { getMovieReviewsService } from "../services/reviews.services.js";
@@ -16,7 +16,7 @@ export const getTopMovies = async (req, res) => {
 };
 
 export const getMovieById = async (req, res) => {
-  const movie = await getMovieService(req.validatedParams.tmdbId, req.user.userId);
+  const movie = await getMovieDetailService(req.validatedParams.tmdbId, req.user.userId);
   res.json(movie);
 };
 

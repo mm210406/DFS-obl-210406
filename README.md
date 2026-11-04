@@ -4,9 +4,9 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 
 ## Cómo funciona
 
-- **Catálogo (API externa TMDB):** las películas salen de TMDB. El catálogo oculta las películas de géneros bloqueados por el admin y las películas para adultos. Se puede filtrar por géneros (`genres`, tmdbIds separados por coma; la película tiene que tener todos) y por año de estreno (`yearFrom`, `yearTo`). Cada película trae `score`, con el promedio y la cantidad de reseñas de CineReview (`null` si no tiene).
+- **Catálogo (API externa TMDB):** las películas salen de TMDB. El catálogo oculta las películas de géneros bloqueados por el admin y las películas para adultos. Se puede filtrar por géneros (`genres`, tmdbIds separados por coma; la película tiene que tener todos) y por año de estreno (`yearFrom`, `yearTo`). Cada película trae `score`, con el promedio y la cantidad de reseñas de CineReview (`null` si no tiene), y además del póster (`posterUrl`) una imagen horizontal (`backdropUrl`).
 - **Puntaje CineReview (`minScore`):** TMDB no conoce las reseñas de CineReview, así que con este filtro las películas salen de las reseñas guardadas en MongoDB: se agrupan por película, se filtran por promedio, géneros, años y título, y se ordenan por promedio. Solo aparecen películas que ya tienen reseñas. Para esto cada reseña guarda el año de estreno y el póster de la película.
-- **Top 10:** las 10 películas con mejor promedio entre las reseñas hechas en los últimos 30 días. Si hay empate en el promedio, gana la que tiene más reseñas.
+- **Top 10:** las 10 películas con mejor promedio entre las reseñas hechas en los últimos 30 días. Si hay empate en el promedio, gana la que tiene más reseñas. La #1 trae además su imagen horizontal (`backdropUrl`).
 - **Géneros (categorías):** son los géneros de TMDB, identificados por `tmdbId`. El admin consulta la lista de TMDB y crea los que quiere ofrecer, con nombre e ícono opcionales. El catálogo solo muestra películas cuyos géneros estén todos creados y permitidos (`allowed`). No se puede borrar un género con reseñas; para dejar de permitirlo se deshabilita. Si el usuario reseñó una película que después quedó bloqueada, puede seguir viendo su detalle.
 - **Reseñas (documento principal):** el usuario elige una película del catálogo por su `tmdbId`. El backend trae el título, la sinopsis y los géneros de TMDB y rechaza la reseña si la película no está permitida. Una reseña por película. Las reseñas son públicas: en el detalle de una película se ven las de todos los usuarios (solo el nombre y la foto del autor), pero cada usuario solo puede modificar o eliminar las suyas.
 - **Planes:** PLUS permite 4 reseñas y PREMIUM, ilimitadas. El admin no gestiona planes.
@@ -43,7 +43,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | DELETE | `/v1/users/me/avatar` | Usuario | Elimina la foto de perfil |
 | GET | `/v1/movies?page=&title=&genres=&yearFrom=&yearTo=&minScore=` | Usuario | Catálogo de películas permitidas, con filtros y puntaje CineReview |
 | GET | `/v1/movies/top` | Usuario | Top 10 de los últimos 30 días |
-| GET | `/v1/movies/:tmdbId` | Usuario | Detalle de una película |
+| GET | `/v1/movies/:tmdbId` | Usuario | Detalle de una película, con su puntaje CineReview (`score`) |
 | GET | `/v1/movies/:tmdbId/reviews?page=&limit=` | Usuario | Reseñas de todos los usuarios para esa película, paginadas |
 | GET | `/v1/reviews?page=&limit=&genreId=&points=&title=` | Usuario | Reseñas propias, paginadas y filtradas |
 | GET | `/v1/reviews/:id` | Usuario | Una reseña propia |

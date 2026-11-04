@@ -6,6 +6,7 @@ import { escapeRegex } from "../utils/regex.util.js";
 
 const TMDB_URL = "https://api.themoviedb.org/3";
 const POSTER_URL = "https://image.tmdb.org/t/p/w500";
+const BACKDROP_URL = "https://image.tmdb.org/t/p/w1280";
 const TMDB_MAX_PAGES = 500;
 const CATALOG_PAGE_SIZE = 20;
 const TOP_LIMIT = 10;
@@ -40,6 +41,7 @@ const formatMovie = (movie, movieGenreIds, dbGenres) => ({
   overview: movie.overview,
   releaseDate: movie.release_date,
   posterUrl: movie.poster_path ? `${POSTER_URL}${movie.poster_path}` : "",
+  backdropUrl: movie.backdrop_path ? `${BACKDROP_URL}${movie.backdrop_path}` : "",
   genres: dbGenres
     .filter((genre) => movieGenreIds.includes(genre.tmdbId))
     .map((genre) => ({ _id: genre._id, name: genre.name })),
@@ -218,15 +220,29 @@ export const getTopMoviesService = async () => {
     { $limit: TOP_LIMIT },
   ]);
 
-  return {
-    days: TOP_DAYS,
-    from,
-    to,
-    movies: movies.map((movie, index) => ({
-      position: index + 1,
-      ...formatReviewedMovie(movie, dbGenres),
-    })),
-  };
+  const top = movies.map((movie, index) => ({
+    position: index + 1,
+    ...formatReviewedMovie(movie, dbGenres),
+  }));
+
+  // La #1 se muestra en grande: su imagen horizontal se pide a TMDB solo para ella
+  if (top.length > 0) {
+    try {
+      const movie = await tmdbGet(`/movie/${top[0].tmdbId}`);
+      top[0].backdropUrl = movie.backdrop_path ? `${BACKDROP_URL}${movie.backdrop_path}` : "";
+    } catch (error) {
+      top[0].backdropUrl = "";
+    }
+  }
+
+  return { days: TOP_DAYS, from, to, movies: top };
+};
+
+// Detalle para el front: la película más el puntaje de CineReview
+export const getMovieDetailService = async (tmdbId, userId) => {
+  const movie = await getMovieService(tmdbId, userId);
+  const scores = await getScoresService([movie.tmdbId]);
+  return { ...movie, score: scores.get(movie.tmdbId) || null };
 };
 
 export const getMovieService = async (tmdbId, userId) => {
