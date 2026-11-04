@@ -15,10 +15,13 @@ const reviewSchema = new mongoose.Schema(
     points: { type: Number, required: true, min: 1, max: 10 },
     imageUrl: { type: String, trim: true, default: "" },
     imagePublicId: { type: String, default: "" },
+    releaseDate: { type: String, default: "" },
+    posterUrl: { type: String, default: "" },
   },
   { timestamps: true },
 );
 
 reviewSchema.index({ tmdbId: 1, createdAt: -1 });
+reviewSchema.index({ userId: 1, tmdbId: 1 }, { unique: true });
 
 export default mongoose.model("Review", reviewSchema);

@@ -150,6 +150,8 @@ const createReview = async (user, { tmdbId, points, description }) => {
       movieTitle: movie.title,
       synopsis: movie.overview,
       genres: movie.genres.map((genre) => genre._id),
+      releaseDate: movie.releaseDate || "",
+      posterUrl: movie.posterUrl,
       description,
       points,
       imageUrl: movie.posterUrl,

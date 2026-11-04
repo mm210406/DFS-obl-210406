@@ -4,10 +4,9 @@ import { getMovieService } from "./movies.services.js";
 import { updateRecommendationsService } from "./recommendations.services.js";
 import { uploadImageService, deleteImageService } from "./images.services.js";
 import { createError } from "../utils/error.util.js";
+import { escapeRegex } from "../utils/regex.util.js";
 
 export const PLUS_REVIEW_LIMIT = 4;
-
-const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export const createReviewService = async (userId, data, file) => {
   const user = await User.findById(userId);
@@ -37,6 +36,8 @@ export const createReviewService = async (userId, data, file) => {
       movieTitle: movie.title,
       synopsis: movie.overview,
       genres: movie.genres.map((genre) => genre._id),
+      releaseDate: movie.releaseDate || "",
+      posterUrl: movie.posterUrl,
       description: data.description,
       points: data.points,
       imageUrl: image?.url || movie.posterUrl,

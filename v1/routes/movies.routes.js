@@ -6,11 +6,18 @@ import {
   tmdbIdParamSchema,
   movieReviewsQuerySchema,
 } from "../validators/movies.validators.js";
-import { getMovies, getMovieById, getMovieReviews } from "../controllers/movies.controllers.js";
+import {
+  getMovies,
+  getTopMovies,
+  getMovieById,
+  getMovieReviews,
+} from "../controllers/movies.controllers.js";
 
 const router = express.Router();
 
 router.get("/", validateQueryMiddleware(moviesQuerySchema), getMovies);
+// /top va antes de /:tmdbId para que "top" no se tome como un id
+router.get("/top", getTopMovies);
 router.get("/:tmdbId", validateParamsMiddleware(tmdbIdParamSchema), getMovieById);
 router.get(
   "/:tmdbId/reviews",

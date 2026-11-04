@@ -3055,6 +3055,390 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "filtros",
+                    "item": [
+                        {
+                            "name": "200 Filtrar por géneros y años",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Response has page, totalPages and movies\", function () {",
+                                            "    pm.expect(json.page).to.eql(1);",
+                                            "    pm.expect(json.totalPages).to.be.a(\"number\");",
+                                            "    pm.expect(json.movies).to.be.an(\"array\");",
+                                            "    pm.expect(json.movies.length).to.be.at.least(1);",
+                                            "});",
+                                            "pm.test(\"Every movie is Animación and Familia\", function () {",
+                                            "    json.movies.forEach(movie => {",
+                                            "        const names = movie.genres.map(g => g.name);",
+                                            "        pm.expect(names).to.include(\"Animación\");",
+                                            "        pm.expect(names).to.include(\"Familia\");",
+                                            "    });",
+                                            "});",
+                                            "pm.test(\"Every movie was released between 2000 and 2026\", function () {",
+                                            "    json.movies.forEach(movie => {",
+                                            "        const year = Number(movie.releaseDate.slice(0, 4));",
+                                            "        pm.expect(year).to.be.within(2000, 2026);",
+                                            "    });",
+                                            "});",
+                                            "pm.test(\"Every movie has a CineReview score or null\", function () {",
+                                            "    json.movies.forEach(movie => {",
+                                            "        pm.expect(movie).to.have.property(\"score\");",
+                                            "        if (movie.score !== null) {",
+                                            "            pm.expect(movie.score.average).to.be.within(1, 10);",
+                                            "            pm.expect(movie.score.count).to.be.at.least(1);",
+                                            "        }",
+                                            "    });",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies?page=1&genres=16,10751&yearFrom=2000&yearTo=2026",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "genres",
+                                            "value": "16,10751"
+                                        },
+                                        {
+                                            "key": "yearFrom",
+                                            "value": "2000"
+                                        },
+                                        {
+                                            "key": "yearTo",
+                                            "value": "2026"
+                                        }
+                                    ]
+                                },
+                                "description": "Filtra por Animación (16) y Familia (10751), estrenadas entre 2000 y 2026. Cada película trae score con el promedio de CineReview."
+                            }
+                        },
+                        {
+                            "name": "200 Filtrar por puntaje CineReview",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Response has page, totalPages and movies\", function () {",
+                                            "    pm.expect(json.page).to.eql(1);",
+                                            "    pm.expect(json.totalPages).to.be.a(\"number\");",
+                                            "    pm.expect(json.movies).to.be.an(\"array\");",
+                                            "    pm.expect(json.movies.length).to.be.at.least(1);",
+                                            "});",
+                                            "pm.test(\"Every movie has an average of 7 or more\", function () {",
+                                            "    json.movies.forEach(movie => {",
+                                            "        pm.expect(movie.score.average).to.be.at.least(7);",
+                                            "        pm.expect(movie.score.count).to.be.at.least(1);",
+                                            "    });",
+                                            "});",
+                                            "pm.test(\"Movies are sorted by average, highest first\", function () {",
+                                            "    const averages = json.movies.map(m => m.score.average);",
+                                            "    pm.expect(averages).to.eql([...averages].sort((a, b) => b - a));",
+                                            "});",
+                                            "pm.test(\"No movie has the blocked genre Terror\", function () {",
+                                            "    json.movies.forEach(movie => {",
+                                            "        pm.expect(movie.genres.map(g => g.name)).to.not.include(\"Terror\");",
+                                            "    });",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies?page=1&minScore=7",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "minScore",
+                                            "value": "7"
+                                        }
+                                    ]
+                                },
+                                "description": "Solo películas con reseñas en CineReview y promedio de 7 o más, ordenadas por promedio."
+                            }
+                        },
+                        {
+                            "name": "400 Filtrar por género no disponible",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Message says the genre is not available\", function () {",
+                                            "    pm.expect(json.mensaje).to.eql(\"Géneros no disponibles: 27\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies?genres=27",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "genres",
+                                            "value": "27"
+                                        }
+                                    ]
+                                },
+                                "description": "Terror (27) está deshabilitado por el admin."
+                            }
+                        },
+                        {
+                            "name": "400 Filtrar con géneros en formato inválido",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Error de validación: genres debe ser una lista de ids de géneros separados por coma\", function () {",
+                                            "    pm.expect(json).to.have.property(\"error\");",
+                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"genres debe ser una lista de ids de géneros separados por coma\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies?genres=animacion",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "genres",
+                                            "value": "animacion"
+                                        }
+                                    ]
+                                },
+                                "description": "genres tiene que ser una lista de tmdbIds separados por coma."
+                            }
+                        },
+                        {
+                            "name": "400 Filtrar con yearTo menor que yearFrom",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Error de validación: yearTo debe ser mayor o igual a yearFrom\", function () {",
+                                            "    pm.expect(json).to.have.property(\"error\");",
+                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"yearTo debe ser mayor o igual a yearFrom\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies?yearFrom=2020&yearTo=2010",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "yearFrom",
+                                            "value": "2020"
+                                        },
+                                        {
+                                            "key": "yearTo",
+                                            "value": "2010"
+                                        }
+                                    ]
+                                },
+                                "description": "El rango de años está invertido."
+                            }
+                        },
+                        {
+                            "name": "400 Filtrar con puntaje fuera de rango",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Error de validación: minScore debe ser menor o igual a 10\", function () {",
+                                            "    pm.expect(json).to.have.property(\"error\");",
+                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"minScore debe ser menor o igual a 10\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies?minScore=11",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "minScore",
+                                            "value": "11"
+                                        }
+                                    ]
+                                },
+                                "description": "El puntaje va de 1 a 10."
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "top 10",
+                    "item": [
+                        {
+                            "name": "200 Top 10 de los últimos 30 días",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Response has days, from, to and movies\", function () {",
+                                            "    pm.expect(json.days).to.eql(30);",
+                                            "    pm.expect(new Date(json.to) - new Date(json.from)).to.eql(30 * 24 * 60 * 60 * 1000);",
+                                            "    pm.expect(json.movies).to.be.an(\"array\");",
+                                            "    pm.expect(json.movies.length).to.be.at.most(10);",
+                                            "});",
+                                            "pm.test(\"Movies are numbered and sorted by average\", function () {",
+                                            "    json.movies.forEach((movie, index) => {",
+                                            "        pm.expect(movie.position).to.eql(index + 1);",
+                                            "        pm.expect(movie.score.count).to.be.at.least(1);",
+                                            "    });",
+                                            "    const averages = json.movies.map(m => m.score.average);",
+                                            "    pm.expect(averages).to.eql([...averages].sort((a, b) => b - a));",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/movies/top",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "movies",
+                                        "top"
+                                    ],
+                                    "query": []
+                                },
+                                "description": "Mejor promedio de las reseñas hechas en los últimos 30 días. Si hay empate, gana la que tiene más reseñas."
+                            }
+                        }
+                    ]
                 }
             ]
         },
