@@ -33,6 +33,9 @@ export const createReviewSchema = Joi.object({
 export const updateReviewSchema = Joi.object({
   description: descriptionRule,
   points: pointsRule,
+  removeImage: Joi.boolean().messages({
+    "boolean.base": "removeImage debe ser true o false",
+  }),
 }).messages(unknownFieldMessage);
 
 export const reviewsQuerySchema = Joi.object({

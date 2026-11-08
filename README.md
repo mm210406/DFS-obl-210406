@@ -12,7 +12,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 - **Planes:** PLUS permite 4 reseñas y PREMIUM, ilimitadas. El admin no gestiona planes.
 - **IA (Groq):** al crear una reseña se generan recomendaciones a partir de las reseñas del usuario. Cada recomendación se verifica contra el catálogo permitido. Si la IA no está disponible, la reseña se guarda igual.
 - **Límite de solicitudes:** cada IP puede hacer hasta 300 solicitudes a `/v1` cada 15 minutos, y hasta 10 intentos de login fallidos cada 15 minutos (los exitosos no cuentan). Al superarlo se responde 429.
-- **Imágenes (Cloudinary):** la imagen se sube junto con la reseña, en el mismo request (form-data, campo `imagen`, hasta 4 MB). Solo se sube a Cloudinary después de validar la reseña, y se borra de Cloudinary si se reemplaza o se elimina la reseña. Si una reseña no tiene imagen, se usa el póster de TMDB.
+- **Imágenes (Cloudinary):** la imagen se sube junto con la reseña, en el mismo request (form-data, campo `imagen`, hasta 4 MB). Solo se sube a Cloudinary después de validar la reseña, y se borra de Cloudinary si se reemplaza o se elimina la reseña. Si una reseña no tiene imagen, se usa el póster de TMDB. Para quitar la foto de una reseña se manda `removeImage: true` en la modificación: se borra de Cloudinary y la reseña vuelve a mostrar el póster. Las reseñas públicas de una película traen `hasImage` para saber si la imagen es una foto del usuario o el póster.
 - **Foto de perfil:** cada usuario puede subir una foto (form-data, campo `imagen`, hasta 4 MB). Se guarda en Cloudinary recortada a 400x400, centrada en la cara. Al reemplazarla o eliminarla, la anterior se borra de Cloudinary. Se devuelve como `avatarUrl` en los datos del usuario (vacío si no tiene).
 
 ## Puesta en marcha
@@ -48,7 +48,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | GET | `/v1/reviews?page=&limit=&genreId=&points=&title=` | Usuario | Reseñas propias, paginadas y filtradas |
 | GET | `/v1/reviews/:id` | Usuario | Una reseña propia |
 | POST | `/v1/reviews` | Usuario | Alta: `tmdbId`, `description`, `points` (JSON o form-data) y archivo `imagen` opcional |
-| PATCH | `/v1/reviews/:id` | Usuario | Modifica `description`, `points` y/o reemplaza el archivo `imagen` |
+| PATCH | `/v1/reviews/:id` | Usuario | Modifica `description`, `points` y/o reemplaza el archivo `imagen`; `removeImage: true` quita la foto |
 | DELETE | `/v1/reviews/:id` | Usuario | Baja |
 | GET | `/v1/genres`, `/v1/genres/:id` | Usuario | Consulta de géneros |
 | GET | `/v1/genres/tmdb` | Admin | Géneros de TMDB e indica cuáles ya están creados |

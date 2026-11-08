@@ -6247,6 +6247,9 @@
                                             "});",
                                             "pm.test(\"Response is paginated\", function () {",
                                             "    pm.expect(json).to.include.keys(\"page\", \"limit\", \"total\", \"pages\");",
+                                            "});",
+                                            "pm.test(\"Cada reseña indica si tiene foto propia\", function () {",
+                                            "    json.reviews.forEach(r => pm.expect(r).to.have.property(\"hasImage\"));",
                                             "});"
                                         ]
                                     }
@@ -6472,6 +6475,61 @@
                             }
                         },
                         {
+                            "name": "200 Quitar la foto de la reseña",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"La reseña vuelve a mostrar el póster\", function () {",
+                                            "    pm.expect(json.imagePublicId).to.eql(\"\");",
+                                            "    pm.expect(json.imageUrl).to.eql(json.posterUrl);",
+                                            "});",
+                                            "pm.test(\"No cambian los demás campos\", function () {",
+                                            "    pm.expect(json.points).to.eql(7);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/reviews/{{reviewId}}",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "reviews",
+                                        "{{reviewId}}"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"removeImage\": true\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
                             "name": "400 Modificar reseña sin campos",
                             "event": [
                                 {
@@ -6615,6 +6673,109 @@
                                 "body": {
                                     "mode": "raw",
                                     "raw": "{\n    \"points\": 11\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "name": "400 Modificar reseña con removeImage inválido",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Error de validación: removeImage debe ser true o false\", function () {",
+                                            "    pm.expect(json).to.have.property(\"error\");",
+                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"removeImage debe ser true o false\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/reviews/{{reviewId}}",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "reviews",
+                                        "{{reviewId}}"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"removeImage\": \"quizas\"\n}",
+                                    "options": {
+                                        "raw": {
+                                            "language": "json"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "name": "400 Modificar reseña solo con removeImage false",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Mensaje: Debe enviar al menos un campo para modificar\", function () {",
+                                            "    pm.expect(json.mensaje).to.eql(\"Debe enviar al menos un campo para modificar\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PATCH",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/reviews/{{reviewId}}",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "reviews",
+                                        "{{reviewId}}"
+                                    ]
+                                },
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"removeImage\": false\n}",
                                     "options": {
                                         "raw": {
                                             "language": "json"

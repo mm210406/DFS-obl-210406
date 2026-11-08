@@ -80,8 +80,13 @@ export const getReviewByIdService = async (userId, id) => {
 };
 
 export const updateReviewService = async (userId, id, data, file) => {
-  if (Object.keys(data).length === 0 && !file) {
+  const { removeImage, ...fields } = data;
+
+  if (Object.keys(fields).length === 0 && !file && !removeImage) {
     throw createError(400, "Debe enviar al menos un campo para modificar");
+  }
+  if (removeImage && file) {
+    throw createError(400, "No se puede enviar una imagen y removeImage a la vez");
   }
 
   const review = await Review.findOne({ _id: id, userId });
@@ -92,10 +97,14 @@ export const updateReviewService = async (userId, id, data, file) => {
   const previousPublicId = review.imagePublicId;
   const image = file ? await uploadImageService(file.buffer) : null;
 
-  review.set(data);
+  review.set(fields);
   if (image) {
     review.imageUrl = image.url;
     review.imagePublicId = image.publicId;
+  } else if (removeImage) {
+    // Sin foto propia, la reseña vuelve a mostrar el póster de TMDB
+    review.imageUrl = review.posterUrl;
+    review.imagePublicId = "";
   }
 
   try {
@@ -105,7 +114,7 @@ export const updateReviewService = async (userId, id, data, file) => {
     throw error;
   }
 
-  if (image) await deleteImageService(previousPublicId);
+  if (image || removeImage) await deleteImageService(previousPublicId);
 
   return await review.populate("genres", "name");
 };
@@ -125,7 +134,7 @@ export const getMovieReviewsService = async (userId, tmdbId, { page, limit }) =>
   const filter = { tmdbId };
   const total = await Review.countDocuments(filter);
   const reviews = await Review.find(filter)
-    .select("points description imageUrl createdAt updatedAt userId")
+    .select("points description imageUrl imagePublicId createdAt updatedAt userId")
     .populate("userId", "name avatarUrl")
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
@@ -146,6 +155,7 @@ export const getMovieReviewsService = async (userId, tmdbId, { page, limit }) =>
       points: review.points,
       description: review.description,
       imageUrl: review.imageUrl,
+      hasImage: Boolean(review.imagePublicId),
       createdAt: review.createdAt,
       updatedAt: review.updatedAt,
     })),
