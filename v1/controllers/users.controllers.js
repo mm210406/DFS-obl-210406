@@ -1,5 +1,6 @@
 import {
   getProfileService,
+  getStatsService,
   upgradePlanService,
   updateAvatarService,
   deleteAvatarService,
@@ -8,6 +9,11 @@ import {
 export const getProfile = async (req, res) => {
   const profile = await getProfileService(req.user.userId);
   res.json(profile);
+};
+
+export const getStats = async (req, res) => {
+  const stats = await getStatsService(req.user.userId);
+  res.json(stats);
 };
 
 export const upgradePlan = async (req, res) => {

@@ -6056,6 +6056,108 @@
                     ]
                 },
                 {
+                    "name": "estadísticas",
+                    "item": [
+                        {
+                            "name": "200 Estadísticas de reseñas del usuario",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Counts the 5 reviews\", function () {",
+                                            "    pm.expect(json.reviews).to.eql(5);",
+                                            "});",
+                                            "pm.test(\"Average is between 1 and 10\", function () {",
+                                            "    pm.expect(json.average).to.be.within(1, 10);",
+                                            "});",
+                                            "pm.test(\"Genres have name and count\", function () {",
+                                            "    pm.expect(json.genres).to.be.an(\"array\").that.is.not.empty;",
+                                            "    json.genres.forEach(function (genre) {",
+                                            "        pm.expect(genre).to.have.property(\"genreId\");",
+                                            "        pm.expect(genre.name).to.be.a(\"string\");",
+                                            "        pm.expect(genre.count).to.be.above(0);",
+                                            "    });",
+                                            "});",
+                                            "pm.test(\"Genres are sorted by count, highest first\", function () {",
+                                            "    const counts = json.genres.map(function (genre) { return genre.count; });",
+                                            "    pm.expect(counts).to.eql(counts.slice().sort(function (a, b) { return b - a; }));",
+                                            "});",
+                                            "pm.test(\"Favorite genre is the one with most reviews\", function () {",
+                                            "    pm.expect(json.favoriteGenre).to.eql(json.genres[0].name);",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/users/me/stats",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "users",
+                                        "me",
+                                        "stats"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "401 Estadísticas sin token",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 401\", function () {",
+                                            "    pm.response.to.have.status(401);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Mensaje: Acceso no autorizado\", function () {",
+                                            "    pm.expect(json.mensaje).to.eql(\"Acceso no autorizado\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/users/me/stats",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "users",
+                                        "me",
+                                        "stats"
+                                    ]
+                                },
+                                "auth": {
+                                    "type": "noauth"
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
                     "name": "obtener",
                     "item": [
                         {

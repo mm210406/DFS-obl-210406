@@ -38,6 +38,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | POST | `/v1/auth/register` | Pública | Registro (CLIENT, plan PLUS) con autologin |
 | POST | `/v1/auth/login` | Pública | Login |
 | GET | `/v1/users/me` | Usuario | Perfil, uso del plan y recomendaciones |
+| GET | `/v1/users/me/stats` | Usuario | Cantidad de reseñas, promedio, género favorito y reseñas por género |
 | PATCH | `/v1/users/plan` | Usuario | Cambio de PLUS a PREMIUM |
 | PUT | `/v1/users/me/avatar` | Usuario | Sube o reemplaza la foto de perfil (form-data, campo `imagen`) |
 | DELETE | `/v1/users/me/avatar` | Usuario | Elimina la foto de perfil |
