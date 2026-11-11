@@ -6,7 +6,7 @@ import {
 import { getMovieReviewsService } from "../services/reviews.services.js";
 
 export const getMovies = async (req, res) => {
-  const catalog = await getCatalogService(req.validatedQuery);
+  const catalog = await getCatalogService(req.validatedQuery, req.user.userId);
   res.json(catalog);
 };
 

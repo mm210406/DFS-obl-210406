@@ -199,14 +199,23 @@ const getScoredCatalog = async (filters, dbGenres) => {
   };
 };
 
-export const getCatalogService = async (query) => {
+const addReviewedByMe = async (movies, userId) => {
+  const reviewedIds = await Review.distinct("tmdbId", {
+    userId,
+    tmdbId: { $in: movies.map((movie) => movie.tmdbId) },
+  });
+  return movies.map((movie) => ({ ...movie, reviewedByMe: reviewedIds.includes(movie.tmdbId) }));
+};
+
+export const getCatalogService = async (query, userId) => {
   const { dbGenres, allowedGenreIds } = await getGenreLists();
   const filters = { ...query, genreIds: parseGenreFilter(query.genres, allowedGenreIds) };
 
-  if (filters.minScore) {
-    return getScoredCatalog(filters, dbGenres);
-  }
-  return getTmdbCatalog(filters, dbGenres, allowedGenreIds);
+  const catalog = filters.minScore
+    ? await getScoredCatalog(filters, dbGenres)
+    : await getTmdbCatalog(filters, dbGenres, allowedGenreIds);
+
+  return { ...catalog, movies: await addReviewedByMe(catalog.movies, userId) };
 };
 
 // Top 10 de los últimos 30 días: mejor promedio de las reseñas hechas en ese período

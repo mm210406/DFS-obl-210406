@@ -42,7 +42,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | PATCH | `/v1/users/plan` | Usuario | Cambio de PLUS a PREMIUM |
 | PUT | `/v1/users/me/avatar` | Usuario | Sube o reemplaza la foto de perfil (form-data, campo `imagen`) |
 | DELETE | `/v1/users/me/avatar` | Usuario | Elimina la foto de perfil |
-| GET | `/v1/movies?page=&title=&genres=&yearFrom=&yearTo=&minScore=` | Usuario | Catálogo de películas permitidas, con filtros y puntaje CineReview |
+| GET | `/v1/movies?page=&title=&genres=&yearFrom=&yearTo=&minScore=` | Usuario | Catálogo de películas permitidas, con filtros, puntaje CineReview y si el usuario ya la reseñó (`reviewedByMe`) |
 | GET | `/v1/movies/top` | Usuario | Top 10 de los últimos 30 días |
 | GET | `/v1/movies/:tmdbId` | Usuario | Detalle de una película, con su puntaje CineReview (`score`) |
 | GET | `/v1/movies/:tmdbId/reviews?page=&limit=` | Usuario | Reseñas de todos los usuarios para esa película, paginadas |
