@@ -54,11 +54,18 @@ export const createReviewService = async (userId, data, file) => {
   return { review, recommendations };
 };
 
-export const getReviewsService = async (userId, { page, limit, genreId, points, title }) => {
+export const getReviewsService = async (
+  userId,
+  { page, limit, genreId, pointsFrom, pointsTo, title },
+) => {
   const filter = { userId };
 
   if (genreId) filter.genres = genreId;
-  if (points) filter.points = points;
+  if (pointsFrom || pointsTo) {
+    filter.points = {};
+    if (pointsFrom) filter.points.$gte = pointsFrom;
+    if (pointsTo) filter.points.$lte = pointsTo;
+  }
   if (title) filter.movieTitle = { $regex: escapeRegex(title), $options: "i" };
 
   const total = await Review.countDocuments(filter);

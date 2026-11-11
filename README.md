@@ -46,7 +46,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 | GET | `/v1/movies/top` | Usuario | Top 10 de los últimos 30 días |
 | GET | `/v1/movies/:tmdbId` | Usuario | Detalle de una película, con su puntaje CineReview (`score`) |
 | GET | `/v1/movies/:tmdbId/reviews?page=&limit=` | Usuario | Reseñas de todos los usuarios para esa película, paginadas |
-| GET | `/v1/reviews?page=&limit=&genreId=&points=&title=` | Usuario | Reseñas propias, paginadas y filtradas |
+| GET | `/v1/reviews?page=&limit=&genreId=&pointsFrom=&pointsTo=&title=` | Usuario | Reseñas propias, paginadas y filtradas (puntaje entre `pointsFrom` y `pointsTo`, inclusive) |
 | GET | `/v1/reviews/:id` | Usuario | Una reseña propia |
 | POST | `/v1/reviews` | Usuario | Alta: `tmdbId`, `description`, `points` (JSON o form-data) y archivo `imagen` opcional |
 | PATCH | `/v1/reviews/:id` | Usuario | Modifica `description`, `points` y/o reemplaza el archivo `imagen`; `removeImage: true` quita la foto |

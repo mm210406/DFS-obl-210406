@@ -5843,7 +5843,60 @@
                             }
                         },
                         {
-                            "name": "200 Filtrar por puntaje",
+                            "name": "200 Filtrar por rango de puntaje",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Response has pagination data\", function () {",
+                                            "    pm.expect(json).to.have.property(\"page\");",
+                                            "    pm.expect(json).to.have.property(\"limit\");",
+                                            "    pm.expect(json).to.have.property(\"total\");",
+                                            "    pm.expect(json).to.have.property(\"pages\");",
+                                            "    pm.expect(json.reviews).to.be.an(\"array\");",
+                                            "});",
+                                            "pm.test(\"Every review has between 8 and 10 points\", function () {",
+                                            "    json.reviews.forEach(review => pm.expect(review.points).to.be.within(8, 10));",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/reviews?pointsFrom=8&pointsTo=10",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "reviews"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "pointsFrom",
+                                            "value": "8"
+                                        },
+                                        {
+                                            "key": "pointsTo",
+                                            "value": "10"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "200 Filtrar por puntaje exacto",
                             "event": [
                                 {
                                     "listen": "test",
@@ -5875,7 +5928,7 @@
                                 "method": "GET",
                                 "header": [],
                                 "url": {
-                                    "raw": "{{prod_base_url}}/reviews?points=8",
+                                    "raw": "{{prod_base_url}}/reviews?pointsFrom=8&pointsTo=8",
                                     "host": [
                                         "{{prod_base_url}}"
                                     ],
@@ -5884,7 +5937,60 @@
                                     ],
                                     "query": [
                                         {
-                                            "key": "points",
+                                            "key": "pointsFrom",
+                                            "value": "8"
+                                        },
+                                        {
+                                            "key": "pointsTo",
+                                            "value": "8"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "200 Filtrar por puntaje mínimo",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 200\", function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Response has pagination data\", function () {",
+                                            "    pm.expect(json).to.have.property(\"page\");",
+                                            "    pm.expect(json).to.have.property(\"limit\");",
+                                            "    pm.expect(json).to.have.property(\"total\");",
+                                            "    pm.expect(json).to.have.property(\"pages\");",
+                                            "    pm.expect(json.reviews).to.be.an(\"array\");",
+                                            "});",
+                                            "pm.test(\"Every review has at least 8 points\", function () {",
+                                            "    json.reviews.forEach(review => pm.expect(review.points).to.be.at.least(8));",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/reviews?pointsFrom=8",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "reviews"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "pointsFrom",
                                             "value": "8"
                                         }
                                     ]
@@ -6078,9 +6184,9 @@
                                             "    pm.response.to.be.json;",
                                             "});",
                                             "const json = pm.response.json();",
-                                            "pm.test(\"Error de validación: El puntaje debe ser como máximo 10\", function () {",
+                                            "pm.test(\"Error de validación: pointsTo debe ser menor o igual a 10\", function () {",
                                             "    pm.expect(json).to.have.property(\"error\");",
-                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"El puntaje debe ser como máximo 10\");",
+                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"pointsTo debe ser menor o igual a 10\");",
                                             "});"
                                         ]
                                     }
@@ -6090,7 +6196,7 @@
                                 "method": "GET",
                                 "header": [],
                                 "url": {
-                                    "raw": "{{prod_base_url}}/reviews?points=11",
+                                    "raw": "{{prod_base_url}}/reviews?pointsTo=11",
                                     "host": [
                                         "{{prod_base_url}}"
                                     ],
@@ -6099,8 +6205,55 @@
                                     ],
                                     "query": [
                                         {
-                                            "key": "points",
+                                            "key": "pointsTo",
                                             "value": "11"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "400 Filtrar con rango de puntaje invertido",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "type": "text/javascript",
+                                        "exec": [
+                                            "pm.test(\"Status code is 400\", function () {",
+                                            "    pm.response.to.have.status(400);",
+                                            "});",
+                                            "pm.test(\"Response is JSON\", function () {",
+                                            "    pm.response.to.be.json;",
+                                            "});",
+                                            "const json = pm.response.json();",
+                                            "pm.test(\"Error de validación: pointsTo debe ser mayor o igual a pointsFrom\", function () {",
+                                            "    pm.expect(json).to.have.property(\"error\");",
+                                            "    pm.expect(json.error.details.map(d => d.message)).to.include(\"pointsTo debe ser mayor o igual a pointsFrom\");",
+                                            "});"
+                                        ]
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{prod_base_url}}/reviews?pointsFrom=9&pointsTo=3",
+                                    "host": [
+                                        "{{prod_base_url}}"
+                                    ],
+                                    "path": [
+                                        "reviews"
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "pointsFrom",
+                                            "value": "9"
+                                        },
+                                        {
+                                            "key": "pointsTo",
+                                            "value": "3"
                                         }
                                     ]
                                 }

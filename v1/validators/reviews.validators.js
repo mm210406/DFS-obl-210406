@@ -17,6 +17,14 @@ const pointsRule = Joi.number().integer().min(1).max(10).messages({
   "any.required": "El puntaje es obligatorio",
 });
 
+const pointsFilterRule = (name) =>
+  Joi.number().integer().min(1).max(10).messages({
+    "number.base": `${name} debe ser un número`,
+    "number.integer": `${name} debe ser un número entero`,
+    "number.min": `${name} debe ser mayor o igual a {#limit}`,
+    "number.max": `${name} debe ser menor o igual a {#limit}`,
+  });
+
 const unknownFieldMessage = { "object.unknown": "No se permite el campo {#label}" };
 
 export const createReviewSchema = Joi.object({
@@ -54,8 +62,14 @@ export const reviewsQuerySchema = Joi.object({
     "string.hex": "genreId debe ser un id válido",
     "string.length": "genreId debe ser un id válido",
   }),
-  points: pointsRule,
+  pointsFrom: pointsFilterRule("pointsFrom"),
+  pointsTo: pointsFilterRule("pointsTo"),
   title: Joi.string().trim().max(100).messages({
     "string.max": "El título no puede tener más de {#limit} caracteres",
   }),
+}).custom((value, helpers) => {
+  if (value.pointsFrom && value.pointsTo && value.pointsTo < value.pointsFrom) {
+    return helpers.message("pointsTo debe ser mayor o igual a pointsFrom");
+  }
+  return value;
 });
