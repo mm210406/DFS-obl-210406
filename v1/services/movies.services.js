@@ -200,11 +200,17 @@ const getScoredCatalog = async (filters, dbGenres) => {
 };
 
 const addReviewedByMe = async (movies, userId) => {
-  const reviewedIds = await Review.distinct("tmdbId", {
+  const myReviews = await Review.find({
     userId,
     tmdbId: { $in: movies.map((movie) => movie.tmdbId) },
-  });
-  return movies.map((movie) => ({ ...movie, reviewedByMe: reviewedIds.includes(movie.tmdbId) }));
+  }).select("tmdbId points");
+  const myPoints = new Map(myReviews.map((review) => [review.tmdbId, review.points]));
+
+  return movies.map((movie) => ({
+    ...movie,
+    reviewedByMe: myPoints.has(movie.tmdbId),
+    myPoints: myPoints.get(movie.tmdbId) ?? null,
+  }));
 };
 
 export const getCatalogService = async (query, userId) => {

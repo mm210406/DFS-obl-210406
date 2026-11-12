@@ -2832,11 +2832,16 @@
                                             "pm.test(\"Each movie says if the user already reviewed it\", function () {",
                                             "    json.movies.forEach(function (movie) {",
                                             "        pm.expect(movie.reviewedByMe).to.be.a(\"boolean\");",
+                                            "        pm.expect(movie).to.have.property(\"myPoints\");",
                                             "    });",
                                             "});",
                                             "pm.test(\"The movie is not reviewed yet\", function () {",
                                             "    const movie = json.movies.find(m => m.tmdbId === Number(pm.collectionVariables.get(\"movieId1\")));",
                                             "    pm.expect(movie.reviewedByMe).to.eql(false);",
+                                            "});",
+                                            "pm.test(\"A movie not reviewed has no points of the user\", function () {",
+                                            "    const movie = json.movies.find(m => m.tmdbId === Number(pm.collectionVariables.get(\"movieId1\")));",
+                                            "    pm.expect(movie.myPoints).to.eql(null);",
                                             "});"
                                         ]
                                     }
@@ -5765,6 +5770,10 @@
                                             "    const movie = json.movies.find(m => m.tmdbId === Number(pm.collectionVariables.get(\"movieId1\")));",
                                             "    pm.expect(movie).to.be.an(\"object\");",
                                             "    pm.expect(movie.reviewedByMe).to.eql(true);",
+                                            "});",
+                                            "pm.test(\"The reviewed movie has the points of the user\", function () {",
+                                            "    const movie = json.movies.find(m => m.tmdbId === Number(pm.collectionVariables.get(\"movieId1\")));",
+                                            "    pm.expect(movie.myPoints).to.be.a(\"number\").and.to.be.within(1, 10);",
                                             "});"
                                         ]
                                     }
