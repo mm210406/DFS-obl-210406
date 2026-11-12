@@ -6573,6 +6573,11 @@
                                             "});",
                                             "pm.test(\"Cada reseña indica si tiene foto propia\", function () {",
                                             "    json.reviews.forEach(r => pm.expect(r).to.have.property(\"hasImage\"));",
+                                            "});",
+                                            "pm.test(\"Returns my review apart in myReview\", function () {",
+                                            "    pm.expect(json.myReview).to.be.an(\"object\");",
+                                            "    pm.expect(json.myReview._id).to.eql(pm.collectionVariables.get(\"reviewId\"));",
+                                            "    pm.expect(json.myReview.isMine).to.eql(true);",
                                             "});"
                                         ]
                                     }
@@ -6610,6 +6615,10 @@
                                             "pm.test(\"Other users can see the review, not as theirs\", function () {",
                                             "    pm.expect(review).to.exist;",
                                             "    pm.expect(review.isMine).to.eql(false);",
+                                            "});",
+                                            "pm.test(\"myReview never returns the review of another user\", function () {",
+                                            "    pm.expect(json).to.have.property(\"myReview\");",
+                                            "    if (json.myReview) pm.expect(json.myReview._id).to.not.eql(pm.collectionVariables.get(\"reviewId\"));",
                                             "});"
                                         ]
                                     }

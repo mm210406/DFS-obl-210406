@@ -135,36 +135,46 @@ export const deleteReviewService = async (userId, id) => {
   return review;
 };
 
+const PUBLIC_REVIEW_FIELDS = "points description imageUrl imagePublicId createdAt updatedAt userId";
+
+const toPublicReview = (review, userId) => ({
+  _id: review._id,
+  author: {
+    name: review.userId?.name || "Usuario eliminado",
+    avatarUrl: review.userId?.avatarUrl || "",
+  },
+  isMine: String(review.userId?._id) === String(userId),
+  points: review.points,
+  description: review.description,
+  imageUrl: review.imageUrl,
+  hasImage: Boolean(review.imagePublicId),
+  createdAt: review.createdAt,
+  updatedAt: review.updatedAt,
+});
+
 export const getMovieReviewsService = async (userId, tmdbId, { page, limit }) => {
   await getMovieService(tmdbId, userId);
 
   const filter = { tmdbId };
-  const total = await Review.countDocuments(filter);
-  const reviews = await Review.find(filter)
-    .select("points description imageUrl imagePublicId createdAt updatedAt userId")
-    .populate("userId", "name avatarUrl")
-    .sort({ createdAt: -1 })
-    .skip((page - 1) * limit)
-    .limit(limit);
+  const [total, reviews, myReview] = await Promise.all([
+    Review.countDocuments(filter),
+    Review.find(filter)
+      .select(PUBLIC_REVIEW_FIELDS)
+      .populate("userId", "name avatarUrl")
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit),
+    Review.findOne({ tmdbId, userId })
+      .select(PUBLIC_REVIEW_FIELDS)
+      .populate("userId", "name avatarUrl"),
+  ]);
 
   return {
     page,
     limit,
     total,
     pages: Math.ceil(total / limit),
-    reviews: reviews.map((review) => ({
-      _id: review._id,
-      author: {
-        name: review.userId?.name || "Usuario eliminado",
-        avatarUrl: review.userId?.avatarUrl || "",
-      },
-      isMine: String(review.userId?._id) === String(userId),
-      points: review.points,
-      description: review.description,
-      imageUrl: review.imageUrl,
-      hasImage: Boolean(review.imagePublicId),
-      createdAt: review.createdAt,
-      updatedAt: review.updatedAt,
-    })),
+    myReview: myReview ? toPublicReview(myReview, userId) : null,
+    reviews: reviews.map((review) => toPublicReview(review, userId)),
   };
 };
