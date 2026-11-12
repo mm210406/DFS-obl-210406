@@ -22,6 +22,7 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 2. `npm run seed` — carga los datos de prueba (ver abajo). Necesita `MONGO_URI`, `TMDB_API_KEY` y `GROQ_API_KEY`. Se puede correr más de una vez sin duplicar datos.
 3. `npm run backfill` — solo si la base tiene reseñas creadas antes de que se guardaran el año de estreno y el póster. Los completa desde TMDB; se puede correr más de una vez.
 4. `npm run dev`
+5. `npm run cleanup` — muestra cuántos usuarios de prueba del runner de Postman (`test_<número>@mail.com`) y reseñas suyas hay. `npm run cleanup -- --confirm` los borra, junto con sus fotos en Cloudinary. La colección de Postman además termina con la carpeta `limpieza`, que borra las reseñas del usuario de prueba de esa corrida.
 
 ## Datos de prueba (seed)
 

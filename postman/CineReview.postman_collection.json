@@ -7565,6 +7565,61 @@
                     }
                 }
             ]
+        },
+        {
+            "name": "limpieza",
+            "item": [
+                {
+                    "name": "200 Borrar las reseñas del usuario de prueba",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test(\"Status code is 200\", function () {",
+                                    "    pm.response.to.have.status(200);",
+                                    "});",
+                                    "const reviews = pm.response.json().reviews;",
+                                    "const baseUrl = pm.collectionVariables.get(\"prod_base_url\");",
+                                    "const token = pm.collectionVariables.get(\"token\");",
+                                    "reviews.forEach(function (review) {",
+                                    "    pm.sendRequest({",
+                                    "        url: `${baseUrl}/reviews/${review._id}`,",
+                                    "        method: \"DELETE\",",
+                                    "        header: { Authorization: `Bearer ${token}` },",
+                                    "    }, function (err, res) {",
+                                    "        pm.test(`Deletes the test review of ${review.movieTitle}`, function () {",
+                                    "            pm.expect(err).to.eql(null);",
+                                    "            pm.expect(res.code).to.eql(200);",
+                                    "        });",
+                                    "    });",
+                                    "});"
+                                ]
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{prod_base_url}}/reviews?limit=50",
+                            "host": [
+                                "{{prod_base_url}}"
+                            ],
+                            "path": [
+                                "reviews"
+                            ],
+                            "query": [
+                                {
+                                    "key": "limit",
+                                    "value": "50"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ],
     "variable": [
