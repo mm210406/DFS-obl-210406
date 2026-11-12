@@ -2,18 +2,9 @@ import Review from "../models/review.model.js";
 import User from "../models/user.model.js";
 import Genre from "../models/genre.model.js";
 import { generateRecommendationsService } from "./ai.services.js";
-import { getCatalogService } from "./movies.services.js";
+import { findAllowedMovieByTitle, normalizeTitle } from "./movies.services.js";
 
 const MAX_RECOMMENDATIONS = 3;
-
-const findMovieInCatalog = async (suggestion, excludedIds) => {
-  const { movies } = await getCatalogService({ page: 1, title: suggestion.title });
-  const candidates = movies.filter((movie) => !excludedIds.includes(movie.tmdbId));
-  const sameYear = candidates.find(
-    (movie) => suggestion.year && movie.releaseDate?.startsWith(String(suggestion.year)),
-  );
-  return sameYear || candidates[0];
-};
 
 export const updateRecommendationsService = async (userId) => {
   try {
@@ -32,12 +23,14 @@ export const updateRecommendationsService = async (userId) => {
     );
 
     const excludedIds = reviews.map((review) => review.tmdbId);
+    const reviewedTitles = reviews.map((review) => normalizeTitle(review.movieTitle));
     const recommendations = [];
 
     for (const suggestion of suggestions) {
       if (recommendations.length === MAX_RECOMMENDATIONS) break;
+      if (!suggestion.title || reviewedTitles.includes(normalizeTitle(suggestion.title))) continue;
 
-      const movie = await findMovieInCatalog(suggestion, excludedIds);
+      const movie = await findAllowedMovieByTitle(suggestion.title, suggestion.year, excludedIds);
       if (movie) {
         excludedIds.push(movie.tmdbId);
         recommendations.push({

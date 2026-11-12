@@ -16,7 +16,8 @@ ${reviewList}
 
 Recomendá ${SUGGESTIONS_REQUESTED} películas que el usuario no haya reseñado, parecidas a las que mejor puntuó y aptas para todo público.
 Si los hay, tené en cuenta los comentarios específicos de qué parte disfrutaron más, y de las edades de los personajes, para recomendar películas similares.
-Tené más en cuenta las reseñas más nuevas y mejor puntuadas, y no repitas películas que ya haya reseñado.
+Tené más en cuenta las reseñas más nuevas y mejor puntuadas.
+No incluyas en la respuesta ninguna película que ya haya reseñado, ni siquiera para aclarar que la omitís: cada recomendación tiene que ser una película nueva para el usuario.
 Usá solo películas de estos géneros: ${allowedGenres.join(", ")}.
 Respondé únicamente con JSON, sin texto adicional, con este formato:
 {"recommendations":[{"title":"título original","year":2000,"reason":"una frase breve en español"}]}`;

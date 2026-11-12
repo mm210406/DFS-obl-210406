@@ -137,6 +137,37 @@ const filterTmdbMovies = (results, filters, dbGenres, allowedGenreIds) => {
     .map((movie) => formatMovie(movie, movie.genre_ids, dbGenres));
 };
 
+export const normalizeTitle = (title = "") =>
+  title
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+
+// Para las recomendaciones de la IA: la película permitida cuyo título coincide con el sugerido.
+// Se compara también con el título original, porque la IA sugiere títulos en inglés
+export const findAllowedMovieByTitle = async (title, year, excludedIds) => {
+  const { dbGenres, allowedGenreIds } = await getGenreLists();
+  const data = await tmdbGet("/search/movie", { query: title, include_adult: false });
+  const wanted = normalizeTitle(title);
+
+  const match = data.results
+    .filter((movie) => !excludedIds.includes(movie.id))
+    .filter((movie) => !movie.adult && isMovieAllowed(movie.genre_ids, allowedGenreIds))
+    .filter(
+      (movie) =>
+        normalizeTitle(movie.title) === wanted || normalizeTitle(movie.original_title) === wanted,
+    )
+    .sort(
+      (a, b) =>
+        Number(b.release_date?.startsWith(String(year))) -
+        Number(a.release_date?.startsWith(String(year))),
+    )[0];
+
+  return match ? formatMovie(match, match.genre_ids, dbGenres) : null;
+};
+
 // La búsqueda por título de TMDB no filtra por géneros ni años: se piden varias páginas,
 // se filtran y se arman páginas propias de CATALOG_PAGE_SIZE
 const getSearchCatalog = async (filters, dbGenres, allowedGenreIds) => {
