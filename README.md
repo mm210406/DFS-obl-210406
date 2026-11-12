@@ -29,9 +29,12 @@ API REST de reseñas de películas con enfoque family friendly. Hecha con NodeJS
 - **Géneros creados:** Animación, Aventura, Comedia, Familia, Fantasía, Drama, Ciencia ficción, Música y Terror (deshabilitado). El resto de los géneros de TMDB quedan sin crear.
 - **Admin:** `admin@cinereview.com` / `Admin123` (o los valores de `ADMIN_EMAIL` / `ADMIN_PASSWORD`).
 - **Clientes** (contraseña `Cliente123`):
-  - `ana@cinereview.com` — PREMIUM, 4 reseñas y una de terror hecha antes de deshabilitar Terror.
+  - `ana@cinereview.com` — PREMIUM, 21 reseñas (una de terror, hecha antes de deshabilitar Terror) y recomendaciones generadas por la IA.
   - `carla@cinereview.com` — PLUS, 4 reseñas (llegó al límite).
-  - `bruno@cinereview.com` — PLUS, 3 reseñas y recomendaciones generadas por la IA.
+  - `bruno@cinereview.com` — PLUS, 3 reseñas (le queda 1) y recomendaciones generadas por la IA.
+  - 10 familias más para que el Top 10 tenga promedios variados: `lucia`, `valentina`, `sofia`, `camila` y `florencia` (PREMIUM, 6 o 7 reseñas) y `mateo`, `joaquin`, `martin`, `diego` y `tomas` (PLUS, 3 o 4 reseñas), todos `@cinereview.com`. Reseñan las mismas películas con puntajes distintos.
+- Si una película no se puede reseñar (por ejemplo, si TMDB le cambió los géneros), el seed sigue con la próxima de la lista hasta llegar a la cantidad de reseñas de cada usuario.
+- El Top 10 solo cuenta las reseñas de los últimos 30 días, así que el seed tiene que haberse corrido en ese período para que aparezca.
 
 ## Rutas
 
