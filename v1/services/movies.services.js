@@ -8,6 +8,7 @@ const TMDB_URL = "https://api.themoviedb.org/3";
 const POSTER_URL = "https://image.tmdb.org/t/p/w500";
 const BACKDROP_URL = "https://image.tmdb.org/t/p/w1280";
 const TMDB_MAX_PAGES = 500;
+const TMDB_SEARCH_MAX_PAGES = 10;
 const CATALOG_PAGE_SIZE = 20;
 const TOP_LIMIT = 10;
 const TOP_DAYS = 30;
@@ -127,41 +128,62 @@ const formatReviewedMovie = (movie, dbGenres) => ({
   score: { average: roundScore(movie.average), count: movie.count },
 });
 
-// Sin puntaje: las películas salen de TMDB
-const getTmdbCatalog = async (filters, dbGenres, allowedGenreIds) => {
-  const { page, title, genreIds, yearFrom, yearTo } = filters;
-
-  let data;
-  if (title) {
-    data = await tmdbGet("/search/movie", { query: title, page, include_adult: false });
-  } else {
-    const tmdbGenres = await getTmdbGenresService();
-    const excludedGenreIds = tmdbGenres
-      .map((genre) => genre.id)
-      .filter((genreId) => !allowedGenreIds.includes(genreId));
-
-    data = await tmdbGet("/discover/movie", {
-      page,
-      include_adult: false,
-      sort_by: "popularity.desc",
-      without_genres: excludedGenreIds.join("|") || undefined,
-      with_genres: genreIds.join(",") || undefined,
-      "primary_release_date.gte": yearFrom ? `${yearFrom}-01-01` : undefined,
-      "primary_release_date.lte": yearTo ? `${yearTo}-12-31` : undefined,
-    });
-  }
-
-  // La búsqueda por título de TMDB no acepta géneros ni rango de años: se filtran acá
-  const movies = data.results
+const filterTmdbMovies = (results, filters, dbGenres, allowedGenreIds) => {
+  const { genreIds, yearFrom, yearTo } = filters;
+  return results
     .filter((movie) => !movie.adult && isMovieAllowed(movie.genre_ids, allowedGenreIds))
     .filter((movie) => genreIds.every((genreId) => movie.genre_ids.includes(genreId)))
     .filter((movie) => isInYearRange(movie.release_date, yearFrom, yearTo))
     .map((movie) => formatMovie(movie, movie.genre_ids, dbGenres));
+};
+
+// La búsqueda por título de TMDB no filtra por géneros ni años: se piden varias páginas,
+// se filtran y se arman páginas propias de CATALOG_PAGE_SIZE
+const getSearchCatalog = async (filters, dbGenres, allowedGenreIds) => {
+  const { page, title } = filters;
+  const searchPage = (tmdbPage) =>
+    tmdbGet("/search/movie", { query: title, page: tmdbPage, include_adult: false });
+
+  const firstPage = await searchPage(1);
+  const lastPage = Math.min(firstPage.total_pages, TMDB_SEARCH_MAX_PAGES);
+  const otherPages = await Promise.all(
+    Array.from({ length: Math.max(lastPage - 1, 0) }, (_, index) => searchPage(index + 2)),
+  );
+
+  const results = [firstPage, ...otherPages].flatMap((data) => data.results);
+  const uniqueResults = [...new Map(results.map((movie) => [movie.id, movie])).values()];
+  const movies = filterTmdbMovies(uniqueResults, filters, dbGenres, allowedGenreIds);
+  const start = (page - 1) * CATALOG_PAGE_SIZE;
+
+  return {
+    page,
+    totalPages: Math.ceil(movies.length / CATALOG_PAGE_SIZE),
+    movies: await addScores(movies.slice(start, start + CATALOG_PAGE_SIZE)),
+  };
+};
+
+// Sin título ni puntaje: las películas salen del listado de TMDB, que ya filtra géneros y años
+const getDiscoverCatalog = async (filters, dbGenres, allowedGenreIds) => {
+  const { page, genreIds, yearFrom, yearTo } = filters;
+  const tmdbGenres = await getTmdbGenresService();
+  const excludedGenreIds = tmdbGenres
+    .map((genre) => genre.id)
+    .filter((genreId) => !allowedGenreIds.includes(genreId));
+
+  const data = await tmdbGet("/discover/movie", {
+    page,
+    include_adult: false,
+    sort_by: "popularity.desc",
+    without_genres: excludedGenreIds.join("|") || undefined,
+    with_genres: genreIds.join(",") || undefined,
+    "primary_release_date.gte": yearFrom ? `${yearFrom}-01-01` : undefined,
+    "primary_release_date.lte": yearTo ? `${yearTo}-12-31` : undefined,
+  });
 
   return {
     page: data.page,
     totalPages: Math.min(data.total_pages, TMDB_MAX_PAGES),
-    movies: await addScores(movies),
+    movies: await addScores(filterTmdbMovies(data.results, filters, dbGenres, allowedGenreIds)),
   };
 };
 
@@ -217,9 +239,14 @@ export const getCatalogService = async (query, userId) => {
   const { dbGenres, allowedGenreIds } = await getGenreLists();
   const filters = { ...query, genreIds: parseGenreFilter(query.genres, allowedGenreIds) };
 
-  const catalog = filters.minScore
-    ? await getScoredCatalog(filters, dbGenres)
-    : await getTmdbCatalog(filters, dbGenres, allowedGenreIds);
+  let catalog;
+  if (filters.minScore) {
+    catalog = await getScoredCatalog(filters, dbGenres);
+  } else if (filters.title) {
+    catalog = await getSearchCatalog(filters, dbGenres, allowedGenreIds);
+  } else {
+    catalog = await getDiscoverCatalog(filters, dbGenres, allowedGenreIds);
+  }
 
   return { ...catalog, movies: await addReviewedByMe(catalog.movies, userId) };
 };
